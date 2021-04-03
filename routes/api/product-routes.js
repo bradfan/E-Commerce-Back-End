@@ -7,11 +7,18 @@ const { Product, Category, Tag, ProductTag } = require('../../models');
   // be sure to include its associated Category and Tag data
 router.get('/', async (req, res) => {
   try {
-    const productData = await Category.findAll({
-    include: [{model: Category},{model: Tag},{model: ProductTag}],
+    const productData = await Product.findAll({
+    include: [
+      Category,
+      {
+        model: Tag,
+        through: ProductTag
+      }
+    ],
   });
   res.status(200).json(productData);
   }catch (err) {
+    console.log(err)
     res.status(500).json(err);
   }
 });
@@ -20,13 +27,20 @@ router.get('/', async (req, res) => {
   // be sure to include its associated Category and Tag data
 router.get('/:id', async (req, res) => {
   try{
-    const productData = await Category.findByPk(req.params.id, {
-      include: [{model: Category},{model: Tag},{model: ProductTag}],
+    const productData = await Product.findByPk(req.params.id, {
+      include: [
+        Category,
+        {
+          model: Tag,
+          through: ProductTag
+        }
+      ],
     });
     if(!productData){
       res.status(404).json({message: "No category found with that #id"});
       return;
     }
+    res.status(200).json(productData);
   }catch (err){
     res.status(500).json(err);
   }
@@ -94,7 +108,7 @@ router.put('/:id', (req, res) => {
     })
     .then((updatedProductTags) => res.json(updatedProductTags))
     .catch((err) => {
-      // console.log(err);
+      console.log(err);
       res.status(400).json(err);
     });
 });
